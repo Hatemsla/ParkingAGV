@@ -1,0 +1,21 @@
+<robot>
+
+  <gazebo reference="wing_fl_sensor_link">
+        <sensor name="wing_fl_sensor" type="contact">
+            <update_rate>20.0</update_rate>
+            <always_on>true</always_on>
+            <contact>
+               <collision>wing_fl_link_fixed_joint_lump__wing_fl_sensor_link_collision_1</collision>
+            </contact>
+            <plugin name="gazebo_ros_bumper" filename="libgazebo_ros_bumper.so">
+                <alwaysOn>true</alwaysOn>
+                <updateRate>0.0</updateRate>
+                <bumperTopicName>wing_fl_sensor</bumperTopicName>
+                <frameName>wing_fl_sensor</frameName>
+            </plugin>
+        </sensor>
+  </gazebo>
+
+
+
+</robot>

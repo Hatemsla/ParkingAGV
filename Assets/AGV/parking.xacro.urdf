@@ -1,0 +1,1318 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot name="parking_sim" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find robot)/urdf/parking.gazebo"/>
+  <xacro:include filename="$(find robot)/urdf/wing_fl_sensors.gazebo"/>
+  <xacro:include filename="$(find robot)/urdf/wing_fr_sensors.gazebo"/>
+  <xacro:include filename="$(find robot)/urdf/wing_rl_sensors.gazebo"/>
+  <xacro:include filename="$(find robot)/urdf/wing_rr_sensors.gazebo"/>
+  <xacro:include filename="$(find robot)/urdf/distance_sensors.gazebo"/>
+  <xacro:include filename="$(find robot)/urdf/materials.xacro"/>
+  <xacro:include filename="$(find robot)/urdf/cameras.gazebo"/>
+
+<!--  <xacro:include filename="$(find realsense_ros_gazebo)/xacro/tracker.xacro"/>-->
+<!--  <xacro:include filename="$(find realsense_ros_gazebo)/xacro/depthcam.xacro"/>-->
+
+  <xacro:arg name="pair_prefix" default=""/>
+  <xacro:arg name="robot_prefix" default=""/>
+  <xacro:arg name="gpu" default="true"/>
+  <xacro:property name="gpu" value="$(arg gpu)" />
+  <xacro:arg name="organize_cloud" default="false"/>
+  <xacro:property name="organize_cloud" value="$(arg organize_cloud)" />
+  <xacro:include filename="$(find velodyne_description)/urdf/VLP-16.urdf.xacro"/>
+
+  !-- VELODYNE 3D LIDAR PUCK 1 --
+  <xacro:VLP-16 parent="base_link" name="base_scan_1" topic="/$(arg pair_prefix)/$(arg robot_prefix)/velodyne_points_1" organize_cloud="${organize_cloud}" hz="10" samples="660" min_range="0.08" max_range="15" min_angle="-2.35" max_angle="2.35" gpu="${gpu}">
+    <origin xyz="0.56029 -1.00121 0" rpy="0 0 -0.89081605" />
+  </xacro:VLP-16>
+
+  !-- VELODYNE 3D LIDAR PUCK 2 --
+  <xacro:VLP-16 parent="base_link" name="base_scan_2" topic="/$(arg pair_prefix)/$(arg robot_prefix)/velodyne_points_2" organize_cloud="${organize_cloud}" hz="10" samples="660" min_range="0.08" max_range="15" min_angle="-2.35" max_angle="2.35" gpu="${gpu}">
+    <origin xyz="-0.56029 1.00121 0" rpy="0 0 2.2507766" />
+  </xacro:VLP-16>
+
+<!--   <xacro:include filename="$(find sick_scan)/urdf/sick_scan.urdf.xacro" />-->
+<!--  <xacro:sick_tim_56x name="base_link" ros_topic="scan" z_offset="0.2"/>-->
+<!--  <xacro:sick_mrs_1xxx name="base_link" ros_topic="scan" z_offset="0.2" />-->
+
+<!--  <xacro:realsense_d435 sensor_name="d435" parent_link="base_link" rate="10">-->
+<!--    <origin rpy="0 0 0" xyz="0 0 0.1"/>-->
+<!--  </xacro:realsense_d435>-->
+
+  <link name="base_footprint">
+  </link>
+
+  <joint name="base_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="0 0 1.57" />
+    <parent link="base_footprint"/>
+    <child link="base_link" />
+  </joint>
+
+  <link
+    name="base_link">
+    <inertial>
+      <origin
+        xyz="5.0264E-17 0.034261 -1.2126E-16"
+        rpy="0 0 0" />
+      <mass
+        value="372.12" />
+      <inertia
+        ixx="31.384"
+        ixy="0"
+        ixz="0"
+        iyy="120.4"
+        iyz="0"
+        izz="89.75" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://robot/meshes/base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.65098 0.61961 0.58824 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://robot/meshes/base_link.STL" />
+     </geometry>
+    </collision>
+  </link>
+  <link name="front_left_steering_link">
+    <inertial>
+      <origin
+        xyz="-4.53890702800663E-10 -0.0348550872064206 -1.2273115024275E-08"
+        rpy="0 0 0" />
+      <mass value="5" />
+      <inertia
+        ixx="0.394"
+        ixy="0"
+        ixz="0"
+        iyy="0.747"
+        iyz="0"
+        izz="0.394"  />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://robot/meshes/front_left_steering_link.STL" />
+     </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.65098 0.61961 0.58824 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://robot/meshes/front_left_steering_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="front_left_steering_joint"
+    type="revolute">
+    <origin
+      xyz="0.345 -0.735 0"
+      rpy="-1.5708 0 -1.5708" />
+    <parent
+      link="base_link" />
+    <child
+      link="front_left_steering_link" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="10000"
+      velocity="100" />
+  </joint>
+  <link
+    name="front_left_wheel_link">
+    <inertial>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <mass
+        value="4" />
+      <inertia
+        ixx="0.0664"
+        ixy="0"
+        ixz="0"
+        iyy="0.0664"
+        iyz="0"
+        izz="0.0664"  />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+<!--        <mesh-->
+<!--          filename="package://robot/meshes/front_left_wheel_link.stl" />-->
+        <cylinder length="0.08" radius="0.05"/>
+      </geometry>
+      <material name="">
+        <color rgba="0.65098 0.61961 0.58824 1" />
+      </material>
+    </visual>
+    <collision>
+<!--      <surface>-->
+<!--        <friction>-->
+<!--          <ode>-->
+<!--            <mu1>10000.0</mu1>-->
+<!--            <mu2>10000.0</mu2>-->
+<!--          </ode>-->
+<!--        </friction>-->
+<!--      </surface>-->
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+<!--        <mesh-->
+<!--          filename="package://robot/meshes/front_left_wheel_link.stl" />-->
+        <cylinder length="0.08" radius="0.05"/>
+     </geometry>
+    </collision>
+  </link>
+  <joint
+    name="front_left_wheel_joint"
+    type="continuous">
+    <origin
+       xyz="0 -0.025 0"
+      rpy="0 0 0" />
+    <parent
+      link="front_left_steering_link" />
+    <child
+      link="front_left_wheel_link" />
+    <axis
+      xyz="0 0 1" />
+<!--    <limit effort="10000" velocity="5"/>-->
+  </joint>
+  <link
+    name="front_right_steering_link">
+    <inertial>
+      <origin
+        xyz="-4.5389E-10 0.034855 1.2273E-08"
+        rpy="0 0 0" />
+      <mass
+        value="5" />
+      <inertia
+        ixx="0.394"
+        ixy="0"
+        ixz="0"
+        iyy="0.747"
+        iyz="0"
+        izz="0.394"  />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://robot/meshes/front_right_steering_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.65098 0.61961 0.58824 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://robot/meshes/front_right_steering_link.STL" />
+       </geometry>
+    </collision>
+  </link>
+  <joint
+    name="front_right_steering_joint"
+    type="revolute">
+    <origin
+      xyz="-0.345 -0.735 0"
+      rpy="1.5708 0 1.5708" />
+    <parent
+      link="base_link" />
+    <child
+      link="front_right_steering_link" />
+    <axis
+      xyz="0 1 0" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="10000"
+      velocity="100" />
+  </joint>
+  <link
+    name="front_right_wheel_link">
+    <inertial>
+      <origin
+         xyz="0 0 0"
+        rpy="0 0 0" />
+      <mass
+        value="4" />
+      <inertia
+        ixx="0.0664"
+        ixy="0"
+        ixz="0"
+        iyy="0.0664"
+        iyz="0"
+        izz="0.0664"  />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+<!--        <mesh-->
+<!--          filename="package://robot/meshes/front_right_wheel_link.stl" />-->
+        <cylinder length="0.08" radius="0.05"/>
+       </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.65098 0.61961 0.58824 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+<!--        <mesh-->
+<!--          filename="package://robot/meshes/front_right_wheel_link.stl" />-->
+        <cylinder length="0.08" radius="0.05"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="front_right_wheel_joint"
+    type="continuous">
+    <origin
+      xyz="0 0.025 0"
+      rpy="0 0 0" />
+    <parent
+      link="front_right_steering_link" />
+    <child
+      link="front_right_wheel_link" />
+    <axis
+      xyz="0 0 1" />
+<!--    <limit effort="10000" velocity="5"/>-->
+  </joint>
+  <link
+    name="rear_left_steering_link">
+    <inertial>
+      <origin
+        xyz="-4.5389E-10 0.034855 1.2273E-08"
+        rpy="0 0 0" />
+      <mass
+        value="5" />
+      <inertia
+        ixx="0.394"
+        ixy="0"
+        ixz="0"
+        iyy="0.747"
+        iyz="0"
+        izz="0.394"  />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://robot/meshes/rear_left_steering_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.650980392156863 0.619607843137255 0.588235294117647 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://robot/meshes/rear_left_steering_link.STL" />
+     </geometry>
+    </collision>
+  </link>
+  <joint
+    name="rear_left_steering_joint"
+    type="revolute">
+    <origin
+      xyz="0.345 0.735 0"
+      rpy="1.5708 0 1.5708" />
+    <parent
+      link="base_link" />
+    <child
+      link="rear_left_steering_link" />
+    <axis
+      xyz="0 1 0" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="10000"
+      velocity="100" />
+  </joint>
+  <link
+    name="rear_left_wheel_link">
+    <inertial>
+      <origin
+        xyz="0 0 0 "
+        rpy="0 0 0" />
+     <mass
+        value="4" />
+      <inertia
+        ixx="0.0664"
+        ixy="0"
+        ixz="0"
+        iyy="0.0664"
+        iyz="0"
+        izz="0.0664"  />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+<!--        <mesh-->
+<!--          filename="package://robot/meshes/rear_left_wheel_link.stl" />-->
+        <cylinder length="0.08" radius="0.05"/>
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.65098 0.61961 0.58824 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+<!--        <mesh-->
+<!--          filename="package://robot/meshes/rear_left_wheel_link.stl" />-->
+        <cylinder length="0.08" radius="0.05"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="rear_left_wheel_joint"
+    type="continuous">
+    <origin
+      xyz="0 0.025 0"
+      rpy="0 0 0" />
+    <parent
+      link="rear_left_steering_link" />
+    <child
+      link="rear_left_wheel_link" />
+    <axis
+      xyz="0 0 1" />
+<!--    <limit effort="10000" velocity="5"/>-->
+  </joint>
+  <link
+    name="rear_right_steering_link">
+    <inertial>
+      <origin
+        xyz="-4.5389E-10 0.034855 1.2273E-08"
+        rpy="0 0 0" />
+      <mass
+        value="5" />
+      <inertia
+        ixx="0.394"
+        ixy="0"
+        ixz="0"
+        iyy="0.747"
+        iyz="0"
+        izz="0.394"  />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://robot/meshes/rear_right_steering_link.STL" />
+       </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.65098 0.61961 0.58824 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://robot/meshes/rear_right_steering_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="rear_right_steering_joint"
+    type="revolute">
+    <origin
+      xyz="-0.345 0.735 0"
+      rpy="1.5708 0 1.5708" />
+    <parent
+      link="base_link" />
+    <child
+      link="rear_right_steering_link" />
+    <axis
+      xyz="0 1 0" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="10000"
+      velocity="100" />
+  </joint>
+  <link
+    name="rear_right_wheel_link">
+    <inertial>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <mass
+        value="4" />
+      <inertia
+        ixx="0.0664"
+        ixy="0"
+        ixz="0"
+        iyy="0.0664"
+        iyz="0"
+        izz="0.0664"  />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+<!--        <mesh-->
+<!--          filename="package://robot/meshes/rear_right_wheel_link.stl" />-->
+        <cylinder length="0.08" radius="0.05"/>
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.65098 0.61961 0.58824 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+<!--        <mesh-->
+<!--          filename="package://robot/meshes/rear_right_wheel_link.stl" />-->
+        <cylinder length="0.08" radius="0.05"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="rear_right_wheel_joint"
+    type="continuous">
+    <origin
+      xyz="0 0.025 0"
+      rpy="0 0 0" />
+    <parent
+      link="rear_right_steering_link" />
+    <child
+      link="rear_right_wheel_link" />
+    <axis
+      xyz="0 0 1" />
+<!--    <limit effort="10000" velocity="5"/>-->
+  </joint>
+  <link
+    name="top_link">
+    <inertial>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <mass
+        value="72.09" />
+      <inertia
+        ixx="17.3305"
+        ixy="0"
+        ixz="0"
+        iyy="23.2756"
+        iyz="0"
+        izz="6.02176" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://robot/meshes/top_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.65098 0.61961 0.58824 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://robot/meshes/top_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="top_joint"
+    type="prismatic">
+    <origin
+      xyz="0 0 0"
+      rpy="-1.5708 0 3.1416" />
+    <parent
+      link="base_link" />
+    <child
+      link="top_link" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="0"
+      upper="0.4"
+      effort="1000000000000000000"
+      velocity="0.1" />
+  </joint>
+  <link
+    name="wing_fl_link">
+    <inertial>
+      <origin
+        xyz="0.1865 -0.0056097 0.025017"
+        rpy="0 0 0" />
+      <mass
+        value="17.95" />
+      <inertia
+        ixx="0.2817679"
+        ixy="0"
+        ixz="0"
+        iyy="0.0086783"
+        iyz="0"
+        izz="0.277857025"  />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://robot/meshes/wing_fl_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.65098 0.61961 0.58824 1" />
+      </material>
+     </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://robot/meshes/wing_fl_link.STL"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="wing_fl_joint"
+    type="revolute">
+    <origin
+      xyz="-0.51 -0.077 0.345"
+      rpy="-1.5708 -1.5708 0" />
+    <parent
+      link="top_link" />
+    <child
+      link="wing_fl_link" />
+    <axis
+      xyz="0 0 -1" />
+     <dynamics damping="0.7"/>
+    <limit
+      lower="0"
+      upper="1.797693"
+      effort="40000"
+      velocity="1" />
+  </joint>
+  <link
+    name="wing_fr_link">
+    <inertial>
+      <origin
+        xyz="0.18444 0.0054046 0.024461"
+        rpy="0 0 0" />
+      <mass
+        value="17.95" />
+      <inertia
+        ixx="0.2817679"
+        ixy="0"
+        ixz="0"
+        iyy="0.0086783"
+        iyz="0"
+        izz="0.277857025"  />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://robot/meshes/wing_fr_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.65098 0.61961 0.58824 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://robot/meshes/wing_fr_link.STL" />
+       </geometry>
+    </collision>
+  </link>
+  <joint
+    name="wing_fr_joint"
+    type="revolute">
+    <origin
+      xyz="0.51 -0.077 0.345"
+      rpy="-1.5708 -1.5708 0" />
+    <parent
+      link="top_link" />
+    <child
+      link="wing_fr_link" />
+    <axis
+      xyz="0 0 1" />
+     <dynamics damping="0.7"/>
+    <limit
+      lower="0"
+      upper="1.797693"
+      effort="40000"
+      velocity="1" />
+  </joint>
+  <link
+    name="wing_rl_link">
+    <inertial>
+      <origin
+        xyz="0.18444 0.0054046 0.024461"
+        rpy="0 0 0" />
+      <mass
+        value="17.95" />
+      <inertia
+        ixx="0.2817679"
+        ixy="0"
+        ixz="0"
+        iyy="0.0086783"
+        iyz="0"
+        izz="0.277857025"  />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://robot/meshes/wing_rl_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.65098 0.61961 0.58824 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://robot/meshes/wing_rl_link.STL" />
+     </geometry>
+    </collision>
+  </link>
+  <joint
+    name="wing_rl_joint"
+    type="revolute">
+    <origin
+      xyz="-0.51 -0.077 -0.345"
+      rpy="-1.5708 1.5708 0" />
+    <parent
+      link="top_link" />
+    <child
+      link="wing_rl_link" />
+    <axis
+      xyz="0 0 1" />
+     <dynamics damping="0.7"/>
+    <limit
+      lower="0"
+      upper="1.797693"
+      effort="40000"
+      velocity="1" />
+  </joint>
+  <link
+    name="wing_rr_link">
+    <inertial>
+      <origin
+        xyz="0.1865 -0.0056097 0.025017"
+        rpy="0 0 0" />
+      <mass
+        value="17.95" />
+      <inertia
+        ixx="0.2817679"
+        ixy="0"
+        ixz="0"
+        iyy="0.0086783"
+        iyz="0"
+        izz="0.277857025"  />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://robot/meshes/wing_rr_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.650980392156863 0.619607843137255 0.588235294117647 1" />
+      </material>
+    </visual>
+    <collision>
+       <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://robot/meshes/wing_rr_link.STL" />
+     </geometry>
+    </collision>
+  </link>
+  <joint
+    name="wing_rr_joint"
+    type="revolute">
+    <origin
+      xyz="0.51 -0.077 -0.345"
+      rpy="-1.5708 1.5708 0" />
+    <parent
+      link="top_link" />
+    <child
+      link="wing_rr_link" />
+    <axis
+      xyz="0 0 -1" />
+     <dynamics damping="0.7"/>
+    <limit
+      lower="0"
+      upper="1.797693"
+      effort="40000"
+      velocity="1" />
+  </joint>
+
+
+  <link name="wing_fl_sensor_link">
+    <collision name="">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+          <box size="0.4 0.03 0.01"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.4 0.03 0.01"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <mass value="1e-5" />
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+    </inertial>
+  </link>
+  <joint name="wing_fl_sensor_joint" type="fixed">
+    <axis xyz="0 0 0" />
+    <origin xyz="0.31 -0.02 0.01" rpy="-0.785398 0 0"/>
+    <parent link="wing_fl_link"/>
+    <child link="wing_fl_sensor_link"/>
+  </joint>
+
+
+  <link name="wing_fr_sensor_link">
+    <collision name="">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+           <box size="0.4 0.03 0.01"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+          <box size="0.4 0.03 0.01"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <mass value="1e-5" />
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+    </inertial>
+  </link>
+  <joint name="wing_fr_sensor_joint" type="fixed">
+    <axis xyz="0 0 0" />
+    <origin xyz="0.31 0.02 0.01" rpy="0.785398 0 0"/>
+    <parent link="wing_fr_link"/>
+    <child link="wing_fr_sensor_link"/>
+  </joint>
+
+
+  <link name="wing_rl_sensor_link">
+    <collision name="">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+           <box size="0.4 0.03 0.01"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+          <box size="0.4 0.03 0.01"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <mass value="1e-5" />
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+    </inertial>
+  </link>
+  <joint name="wing_rl_sensor_joint" type="fixed">
+    <axis xyz="0 0 0" />
+    <origin xyz="0.31 0.02 0.01" rpy="0.785398 0 0"/>
+    <parent link="wing_rl_link"/>
+    <child link="wing_rl_sensor_link"/>
+  </joint>
+
+
+  <link name="wing_rr_sensor_link">
+    <collision name="">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+           <box size="0.4 0.03 0.01"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+          <box size="0.4 0.03 0.01"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <mass value="1e-5" />
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+    </inertial>
+  </link>
+  <joint name="wing_rr_sensor_joint" type="fixed">
+    <axis xyz="0 0 0" />
+    <origin xyz="0.31 -0.02 0.01" rpy="-0.785398 0 0"/>
+    <parent link="wing_rr_link"/>
+    <child link="wing_rr_sensor_link"/>
+  </joint>
+
+
+
+  <transmission name="tran1">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="wing_fl_joint">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor1">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="tran2">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="wing_fr_joint">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor2">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="tran3">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="wing_rl_joint">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor3">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="tran4" type="SimpleTransmission">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="wing_rr_joint">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor4">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="tran5" type="SimpleTransmission">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="top_joint">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor5">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="front_left_wheel_joint_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="front_left_wheel_joint">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="front_left_wheel_joint_motor">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="front_right_wheel_joint_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="front_right_wheel_joint">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="front_right_wheel_joint_motor">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="rear_left_wheel_joint_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="rear_left_wheel_joint">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="rear_left_wheel_joint_motor">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="rear_right_wheel_joint_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="rear_right_wheel_joint">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="rear_right_wheel_joint_motor">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="front_left_steering_joint_trans" type="SimpleTransmission">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="front_left_steering_joint">
+      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="front_left_steering_joint_motor">
+      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="front_right_steering_joint_trans" type="SimpleTransmission">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="front_right_steering_joint">
+      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="front_right_steering_joint_motor">
+      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="rear_left_steering_moint_trans" type="SimpleTransmission">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="rear_left_steering_joint">
+      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="rear_left_steering_joint_motor">
+      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="rear_right_steering_moint_trans" type="SimpleTransmission">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="rear_right_steering_joint">
+      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="rear_right_steering_joint_motor">
+      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+
+  <joint name="imu_joint" type="fixed">
+    <axis xyz="0 1 0"/> <!-- 0 1 0 -->
+    <origin xyz="0 0 0.09"/>
+    <parent link="base_link"/>
+    <child link="imu_link"/>
+  </joint>
+    <link name="imu_link">
+      <inertial>
+        <mass value="0.001"/>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.000001" iyz="0" izz="0.0001"/>
+      </inertial>
+      <visual>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <box size="0.001 0.001 0.001"/>
+        </geometry>
+      </visual>
+      <collision>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <box size=".001 .001 .001"/>
+        </geometry>
+      </collision>
+    </link>
+
+  <joint name="camera_front_joint" type="fixed">
+    <axis xyz="0 0 0"/>
+    <origin xyz="0 -0.978 0.015" rpy="0 1.57 -1.57"/>
+    <parent link="base_link"/>
+    <child link="camera_front_link"/>
+  </joint>
+  <link name="camera_front_link">
+    <inertial>
+        <mass value="0.001"/>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.000001" iyz="0" izz="0.0001"/>
+      </inertial>
+      <visual>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <box size="0.03 0.165 0.025"/>
+        </geometry>
+      </visual>
+  </link>
+  <gazebo reference="camera_front_link">
+    <material>Gazebo/Black</material>
+  </gazebo>
+
+  <joint name="camera_left_joint" type="fixed">
+    <axis xyz="0 0 0"/>
+    <origin xyz="-0.53495 0 0.015" rpy="0 1.57 0"/>
+    <parent link="base_link"/>
+    <child link="camera_left_link"/>
+  </joint>
+  <link name="camera_left_link">
+    <inertial>
+        <mass value="0.001"/>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.000001" iyz="0" izz="0.0001"/>
+      </inertial>
+      <visual>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <box size="0.03 0.165 0.025"/>
+        </geometry>
+      </visual>
+  </link>
+  <gazebo reference="camera_left_link">
+    <material>Gazebo/Black</material>
+  </gazebo>
+
+
+  <joint name="camera_rear_joint" type="fixed">
+    <axis xyz="0 0 0"/>
+    <origin xyz="0 0.978 0.015" rpy="0 1.57 1.57"/>
+    <parent link="base_link"/>
+    <child link="camera_rear_link"/>
+  </joint>
+  <link name="camera_rear_link">
+    <inertial>
+        <mass value="0.001"/>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.000001" iyz="0" izz="0.0001"/>
+      </inertial>
+      <visual>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <box size="0.03 0.165 0.025"/>
+        </geometry>
+      </visual>
+  </link>
+  <gazebo reference="camera_rear_link">
+    <material>Gazebo/Black</material>
+  </gazebo>
+
+
+  <joint name="camera_right_joint" type="fixed">
+    <axis xyz="0 0 0"/>
+    <origin xyz="0.53495 0 0.015" rpy="0 1.57 0"/>
+    <parent link="base_link"/>
+    <child link="camera_right_link"/>
+  </joint>
+  <link name="camera_right_link">
+    <inertial>
+        <mass value="0.001"/>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.000001" iyz="0" izz="0.0001"/>
+      </inertial>
+      <visual>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <box size="0.03 0.165 0.025"/>
+        </geometry>
+      </visual>
+  </link>
+  <gazebo reference="camera_right_link">
+    <material>Gazebo/Black</material>
+  </gazebo>
+
+
+    <joint name="tag_0_joint" type="fixed">
+        <origin xyz="0 0 0.7" rpy="0 0 0" />
+        <parent link="top_link" />
+        <child link="tag_0" />
+        <axis xyz="0 0 1" />
+    </joint>
+    <link name="tag_0">
+    <inertial>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <mass
+        value="0.001" />
+      <inertia
+        ixx="0.0001"
+        ixy="0"
+        ixz="0"
+        iyy="0.000001"
+        iyz="0"
+        izz="0.0001"  />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+         <box size="0.001 0.001 0.001"/>
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.65098 0.61961 0.58824 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+         <box size="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+
+
+    <joint
+    name="tag_1_joint"
+    type="fixed">
+    <origin
+      xyz="0 0 -0.7"
+      rpy="0 0 0" />
+    <parent
+      link="top_link" />
+    <child
+      link="tag_1" />
+    <axis
+      xyz="0 0 1" />
+  </joint>
+  <link
+    name="tag_1">
+    <inertial>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <mass
+        value="0.001" />
+      <inertia
+        ixx="0.0001"
+        ixy="0"
+        ixz="0"
+        iyy="0.000001"
+        iyz="0"
+        izz="0.0001"  />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+         <box size="0.001 0.001 0.001"/>
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.65098 0.61961 0.58824 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+         <box size="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+
+
+ </robot>
